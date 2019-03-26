@@ -7,10 +7,6 @@ nested = require('postcss-nested'),
 cssImport = require('postcss-import'),
 browserSync = require('browser-sync').create();
 
-gulp.task('default', function(done){
-  done();
-});
-
 gulp.task('html', function(done){
   console.log("HTML changes save");
   if(done)done();
@@ -22,20 +18,25 @@ gulp.task('styles', function(){
   .pipe(gulp.dest('./app/temp/styles'));
 });
 
+gulp.task('cssInject', function(){
+  return gulp.src('./app/temp/styles/styles.css')
+  .pipe(browserSync.stream());
+});
+
 gulp.task('watch', function(done){
   browserSync.init({
+    notify: false,
     server: {
       baseDir: "app"
     }
   });
 
-  watch('./app/index.html', ['html'],function(){
-    browserSync.reload(); 
-    
-  })
-  watch('./app/assets/styles/**/*.css', ['styles'], function(){
-
-  });
+  watch('./app/index.html', ['html'], browserSync.reload);
+  watch('./app/assets/styles/**/*.css', gulp.series('styles','cssInject'));
 
   if(done)done();
 })
+
+gulp.task('default', function(done){
+  done();
+});
